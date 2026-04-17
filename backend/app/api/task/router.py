@@ -10,6 +10,8 @@ from app.config.aws import get_s3_client
 from app.core.config import settings
 from botocore.exceptions import ClientError
 from app.worker.tasks import process_pdf
+from app.api.auth.service import get_current_user
+from app.models import User
 
 router = APIRouter()
 
@@ -32,7 +34,8 @@ def generate_presigned_url(s3_key: str) -> str:
 @router.post("/upload/initiate")
 def initiate_upload(
     data: CreateTask,
-    db: Session = Depends(get_session)
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ):
     if not data.files:
         raise HTTPException(status_code=400, detail="No files provided")
@@ -46,8 +49,7 @@ def initiate_upload(
 
         
     task_id = uuid.uuid4()
-    # Using the valid dummy user ID we inserted via terminal
-    user_id = uuid.UUID("8e2bb44d-0153-4c6b-9b9a-72a2b5344b7c")
+    user_id = current_user.id
 
     task = Task(
         id=task_id,
@@ -103,11 +105,15 @@ def initiate_upload(
 @router.post("/upload/complete")
 def complete_upload(
     data: UpdatePDFstatus,
-    db: Session = Depends(get_session)
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ):
     task = db.get(Task, data.task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+        
+    if task.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this task")
 
     pdfs = db.query(PDF).filter(
         PDF.id.in_(data.document_ids),
@@ -161,10 +167,17 @@ def complete_upload(
 
 
 @router.get("/{task_id}")
-def get_task(task_id: uuid.UUID, db: Session = Depends(get_session)):
+def get_task(
+    task_id: uuid.UUID, 
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
     task = db.get(Task, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
+        
+    if task.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this task")
 
     pdfs = db.query(PDF).filter(PDF.task_id == task_id).all()
     

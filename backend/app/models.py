@@ -36,6 +36,7 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     display_name = Column(String)
     email = Column(String, unique=True, nullable=False)
+    google_id = Column(String, unique=True, index=True, nullable=True)
 
     is_email_verified = Column(
         Boolean,
@@ -45,7 +46,7 @@ class User(Base):
     )
 
     verification_token = Column(String)
-    password = Column(String, nullable=False)
+    password = Column(String, nullable=True)
 
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)

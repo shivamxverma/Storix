@@ -1,14 +1,25 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, Plus, Filter, Inbox } from "lucide-react";
 import { useJobStore } from "../../store/useJobStore";
 import { JobRow } from "../../components/JobRow";
 import { JobStatus } from "../../lib/types";
 
 export default function Dashboard() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      router.push("/login");
+    }
+  }, [router]);
+
   const jobs = useJobStore((state) => state.jobs);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<JobStatus | "all">("all");
 

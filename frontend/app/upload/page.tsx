@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { FileUpload } from "../../components/FileUpload";
@@ -10,17 +10,32 @@ import { STEP_ORDER } from "../../lib/types";
 export default function UploadPage() {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
+  
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      router.push("/login");
+    }
+  }, [router]);
+
   const addJob = useJobStore((state) => state.addJob);
 
   const handleUpload = async (file: File) => {
     setIsUploading(true);
     
     try {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
       // 1. Initiate the upload and get the pre-signed S3 URL
       const response = await fetch("http://localhost:8000/api/v1/task/upload/initiate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           name: file.name,
@@ -61,6 +76,7 @@ export default function UploadPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
           task_id: jobId,

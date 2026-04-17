@@ -1,11 +1,15 @@
 import asyncio
 import redis.asyncio as aioredis
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.routes import api_router
 from app.core.middleware import setup_cors
+from app.core.config import settings
 
 app = FastAPI(title="AsyncPDF Backend API",version="1.0.0",)
+app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
