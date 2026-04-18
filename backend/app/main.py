@@ -1,11 +1,15 @@
 import asyncio
 import redis.asyncio as aioredis
+import logging
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.routes import api_router
 from app.core.middleware import setup_cors
 from app.core.config import settings
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="AsyncPDF Backend API", version="1.0.0")
 

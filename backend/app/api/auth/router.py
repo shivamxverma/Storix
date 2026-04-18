@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
+import logging
 from starlette.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 from sqlalchemy.orm import Session
@@ -8,6 +9,7 @@ from app.api.auth.service import get_or_create_google_user, create_access_token
 import json
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 oauth = OAuth()
 oauth.register(
@@ -23,9 +25,9 @@ oauth.register(
 @router.get('/google/login')
 async def login(request: Request):
     redirect_uri = settings.google_redirect_uri
-    print(f"DEBUG: Initiating Google Login")
-    print(f"DEBUG: Configured Redirect URI: {redirect_uri}")
-    print(f"DEBUG: Request Headers: {dict(request.headers)}")
+    logger.info(f"Initiating Google Login")
+    logger.info(f"Configured Redirect URI: {redirect_uri}")
+    logger.info(f"Request Headers: {dict(request.headers)}")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get('/google/callback')
