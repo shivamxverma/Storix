@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "asyncdoc-api",
       script: "venv/bin/uvicorn",
-      args: "app.main:app --host 0.0.0.0 --port 8001",
+      args: "app.main:app --host 0.0.0.0 --port 8020",
       cwd: ".",
       interpreter: "python3",
       watch: false,

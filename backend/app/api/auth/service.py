@@ -10,7 +10,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 import uuid
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/google/login") # Just for reference
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/google/login") 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
